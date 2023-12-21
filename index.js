@@ -77,12 +77,41 @@ app.patch('/update/task/:id', async (req, res) => {
 
 });
 
+app.patch('/update/taskFeatures/:id', async (req, res) => {
 
+
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+  const taskinfo = req.body;
+  console.log("from body update", taskinfo);
+
+  const task = {
+    $set:{
+      task_title: taskinfo.task_title,
+      task_Priority: taskinfo.task_Priority,
+      task_deadline: taskinfo.task_deadline,
+      task_description: taskinfo.task_description,
+      task_user_email: taskinfo.task_user_email,
+      task_status: taskinfo.task_status,
+
+    } ,
+  };
+
+  const result = await taskCollection.updateOne(filter, task, options);
+  console.log("updated task", result);
+  res.send(result);
+
+});
 
 
 ///getting task api
 app.get("/tasks", async (req, res) => {
-  const cursor = taskCollection.find();
+let query={}
+  if (req.query?.email) {
+    query = { task_user_email: req.query.email };
+  }
+  const cursor = taskCollection.find(query);
   const result = await cursor.toArray();
   res.send(result);
 });
