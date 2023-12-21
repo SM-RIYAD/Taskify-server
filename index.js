@@ -45,11 +45,53 @@ app.get("/", (req, res) => {
 
 
 
-///adding product api
+///adding task api
 app.post("/addtask", async (req, res) => {
   const newTask = req.body;
   console.log(newTask);
   const result = await  taskCollection.insertOne(newTask);
+  res.send(result);
+});
+
+///update task api 
+
+app.patch('/update/task/:id', async (req, res) => {
+
+
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+  const taskinfo = req.body;
+  console.log("from body update", taskinfo);
+
+  const task = {
+    $set: {
+     
+      task_status: taskinfo.task_status
+    },
+  };
+
+  const result = await taskCollection.updateOne(filter, task, options);
+  console.log("updated task", result);
+  res.send(result);
+
+});
+
+
+
+
+///getting task api
+app.get("/tasks", async (req, res) => {
+  const cursor = taskCollection.find();
+  const result = await cursor.toArray();
+  res.send(result);
+});
+///delete a task
+app.delete("/deleteTask/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await taskCollection.deleteOne(query);
+  console.log(result);
   res.send(result);
 });
 
